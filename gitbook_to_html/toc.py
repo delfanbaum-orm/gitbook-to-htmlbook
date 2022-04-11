@@ -1,8 +1,11 @@
+import os
 from bs4 import BeautifulSoup
+from .chapter import process_chapter
 
 
 def get_toc_from_index(bookdir):
     """Gets a table of contents list from the index.html file"""
+    bookdir = os.path.abspath(bookdir)
     if not bookdir[-1] == "/":
         bookdir = bookdir + "/"
     try:
@@ -25,7 +28,7 @@ def get_toc_from_index(bookdir):
                 toc_list[bookdir+item["data-path"]] = "appendix"
 
             elif item["data-level"].find(".") == -1:  # type: ignore
-                toc_list[bookdir+item["data-pth"]] = "chapter"
+                toc_list[bookdir+item["data-path"]] = "chapter"
 
             else:
                 print(item)
@@ -41,19 +44,38 @@ def get_toc_from_index(bookdir):
     return toc_list
 
 
-def process_toc(toc_list):
+def write_soup(soup, outfn):
+    with open(outfn, 'wt') as fout:
+        fout.write(str(soup))
+
+
+def process_toc(toc_list, out_dir):
+    out_dir = os.path.abspath(out_dir)
+    if not out_dir[-1] == "/":
+        out_dir = out_dir + "/"
+    
+    chapter_increment = 0
+    part_increment = 0
+    appx_iter = iter('abcdefghijklmnopqrstuvwxyz')
+    internal_links_list = list(toc_list.values())  # for faster searching
+
     for book_element in toc_list.keys():
         if toc_list[book_element] == "preface":
             print("Processing preface...")
 
         elif toc_list[book_element] == "chapter":
-            print("Processing chapter...")
+            chapter_increment += 1
+            print(f"Processing chapter {chapter_increment}...")
+            chapter_text = process_chapter(book_element, chapter_increment)
+            write_soup(chapter_text, f'{out_dir}ch{chapter_increment}.html')
 
         elif toc_list[book_element] == "part":
-            print("Processing part...")
+            part_increment += 1
+            print(f"Processing part {part_increment}...")
 
         elif toc_list[book_element] == "appendix":
-            print("Processing appendix...")
+            appx_increment = next(appx_iter)
+            print(f"Processing appendix {appx_increment}...")
 
         elif toc_list[book_element] == "bibliography":
             print("Processing bibliography...")
