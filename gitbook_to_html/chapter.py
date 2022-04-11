@@ -45,10 +45,13 @@ def process_figures(chapter, fn):
             if isinstance(e, NavigableString):
                 e.replaceWith(re.sub(r'Figure [0-9](.*?): ', '',
                                      e.string))  # type: ignore
+        caption.name = 'figcaption'
 
         # deal with image itself
         del fig.img["width"]
+        # TO DO: there can be many directories. Handle this better
         fig.img["src"] = fig.img["src"].replace('figures/', 'images/')
+        fig.img["src"] = fig.img["src"].replace('premade/', 'images/')
 
 
 def process_chapter_title_and_meta(chapter, ch_no):
@@ -69,6 +72,7 @@ def process_chapter_title_and_meta(chapter, ch_no):
 
     # remove unnecessary junk
     remove_numbering_and_anchors(top_div.h1)
+    top_div.unwrap()
     # set chapter ID
     chapter['id'] = ch_id  # type: ignore
     if int(ch_no) == 1:
@@ -131,6 +135,9 @@ def process_footnotes(chapter):
         ref.insert(0, fn_content)
         ref.p.unwrap()
 
+    ref_div = chapter.select_one('.footnotes')
+    if ref_div:
+        ref_div.decompose()
 
 def process_code(chapter):
     """ seems like a bunch of unnecessary cruft is getting in there
