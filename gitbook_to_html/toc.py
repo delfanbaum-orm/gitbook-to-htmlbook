@@ -1,6 +1,7 @@
 import os
 from bs4 import BeautifulSoup
 from .chapter import process_chapter
+from .part import process_part
 
 
 def get_toc_from_index(bookdir):
@@ -72,6 +73,8 @@ def process_toc(toc_list, out_dir):
         elif toc_list[book_element] == "part":
             part_increment += 1
             print(f"Processing part {part_increment}...")
+            part_text = process_part(book_element) 
+            write_soup(part_text, f'{out_dir}part{part_increment}.html')
 
         elif toc_list[book_element] == "appendix":
             appx_increment = next(appx_iter)

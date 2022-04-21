@@ -139,6 +139,7 @@ def process_footnotes(chapter):
     if ref_div:
         ref_div.decompose()
 
+
 def process_code(chapter):
     """ seems like a bunch of unnecessary cruft is getting in there
     so let's remove it. """

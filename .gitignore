@@ -130,5 +130,6 @@ dmypy.json
 
 # local ignores
 testing/
-
+tester.py
+notes.adoc
 scratch*
